@@ -152,12 +152,12 @@ func execute(path string) error {
 		}
 	}
 
-	b, err := h.spec.MarshalJSON()
+	b, err := h.spec.MarshalYAML()
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile("out.json", b, 0600)
+	return os.WriteFile("out.yaml", b, 0600)
 }
 
 func main() {
