@@ -1,4 +1,4 @@
-package main
+package apigateway2openapi
 
 import (
 	"encoding/json"

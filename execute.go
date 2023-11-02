@@ -1,4 +1,4 @@
-package main
+package apigateway2openapi
 
 import (
 	"encoding/json"
@@ -122,23 +122,4 @@ func Execute(path string) ([]byte, error) {
 	}
 
 	return h.spec.MarshalYAML()
-}
-
-func main() {
-	if len(os.Args) != 2 {
-		log.Println("Missing openapi path")
-		return
-	}
-
-	b, err := Execute(os.Args[1])
-	if err != nil {
-		log.Println("Found error trying to read file:", err.Error())
-		return
-	}
-
-	err = os.WriteFile("out.yaml", b, 0600)
-	if err != nil {
-		log.Println("Found error writing to file:", err.Error())
-		return
-	}
 }
