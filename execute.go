@@ -11,31 +11,27 @@ import (
 	"github.com/swaggest/openapi-go/openapi3"
 )
 
-var enableHack = false
+var enableHack = os.Getenv("HACK")
 
 type SpecHandler struct {
 	specApigateway OpenapiGateway
-	spec           openapi3.Spec
-	reflector      *openapi3.Reflector
+	spec           *openapi3.Spec
 }
 
 func NewSpecHandler(path string) (SpecHandler, error) {
 	handler := SpecHandler{
-		reflector: openapi3.NewReflector(),
+		spec: &openapi3.Spec{},
 	}
 
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return handler, err
 	}
-
 	err = handler.spec.UnmarshalJSON(b)
 	if err != nil {
 		fmt.Println("Found error in file:", path)
 		return handler, err
 	}
-
-	handler.reflector.Spec = &handler.spec
 
 	return handler, json.Unmarshal(b, &handler.specApigateway)
 }
@@ -51,15 +47,20 @@ func Execute(path string) ([]byte, error) {
 			continue
 		}
 
+		if x.Location.Path == "" {
+			x.Location.Path = "/"
+		}
+
 		switch x.Location.Type {
 		case "API":
 			// TODO: remove
 			err = h.processAPIPart(x)
 			if err != nil {
+				log.Println("Found error processing documentation part: API")
 				return nil, err
 			}
 		case "METHOD":
-			if !enableHack {
+			if enableHack != "yes" {
 				continue
 			}
 
@@ -73,6 +74,7 @@ func Execute(path string) ([]byte, error) {
 
 				err := json.Unmarshal(x.Properties, &m)
 				if err != nil {
+					log.Println("Found error processing documentation part: METHOD")
 					return nil, err
 				}
 
@@ -94,8 +96,13 @@ func Execute(path string) ([]byte, error) {
 		case "QUERY_PARAMETER":
 			// TODO
 		case "REQUEST_BODY":
+			if enableHack == "yes" {
+				continue
+			}
+
 			err := h.processRequestBodyPart(x)
 			if err != nil {
+				log.Println("Found error processing documentation part: REQUEST_BODY")
 				return nil, err
 			}
 		case "RESOURCE":
@@ -103,6 +110,7 @@ func Execute(path string) ([]byte, error) {
 
 			err := json.Unmarshal(x.Properties, &m)
 			if err != nil {
+				log.Println("Found error processing documentation part: RESOURCE")
 				return nil, err
 			}
 
@@ -116,6 +124,7 @@ func Execute(path string) ([]byte, error) {
 		case "RESPONSE":
 			err := h.processResponsePart(x)
 			if err != nil {
+				log.Println("Found error processing documentation part: RESPONSE")
 				return nil, err
 			}
 		}

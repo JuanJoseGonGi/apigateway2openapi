@@ -66,6 +66,7 @@ paths:
                 </html>
             statusCode: "200"
         type: mock
+    summary: "The PetStore root resource."
   /pets:
     get:
       parameters:
