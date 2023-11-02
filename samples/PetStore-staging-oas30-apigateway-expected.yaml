@@ -1,0 +1,483 @@
+openapi: 3.0.1
+info:
+  description: Your first API with Amazon API Gateway. This is a sample API that integrates
+    via HTTP with our demo Pet Store endpoints
+  title: PetStore
+  version: "2023-11-01T19:44:06Z"
+servers:
+- url: https://eq3vgsjkve.execute-api.us-east-1.amazonaws.com/{basePath}
+  variables:
+    basePath:
+      default: staging
+paths:
+  /:
+    get:
+      description: PetStore HTML web page containing API usage information
+      responses:
+        "200":
+          description: Successful operation
+          headers:
+            Content-Type:
+              description: Media type of request
+              schema:
+                type: string
+              style: simple
+      tags:
+      - pets
+      x-amazon-apigateway-integration:
+        passthroughBehavior: when_no_match
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            responseParameters:
+              method.response.header.Content-Type: '''text/html'''
+            responseTemplates:
+              text/html: |-
+                <html>
+                    <head>
+                        <style>
+                        body {
+                            color: #333;
+                            font-family: Sans-serif;
+                            max-width: 800px;
+                            margin: auto;
+                        }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Welcome to your Pet Store API</h1>
+                        <p>
+                            You have successfully deployed your first API. You are seeing this HTML page because the <code>GET</code> method to the root resource of your API returns this content as a Mock integration.
+                        </p>
+                        <p>
+                            The Pet Store API contains the <code>/pets</code> and <code>/pets/{petId}</code> resources. By making a <a href="/$context.stage/pets/" target="_blank"><code>GET</code> request</a> to <code>/pets</code> you can retrieve a list of Pets in your API. If you are looking for a specific pet, for example the pet with ID 1, you can make a <a href="/$context.stage/pets/1" target="_blank"><code>GET</code> request</a> to <code>/pets/1</code>.
+                        </p>
+                        <p>
+                            You can use a REST client such as <a href="https://www.getpostman.com/" target="_blank">Postman</a> to test the <code>POST</code> methods in your API to create a new pet. Use the sample body below to send the <code>POST</code> request:
+                        </p>
+                        <pre>
+                {
+                    "type" : "cat",
+                    "price" : 123.11
+                }
+                        </pre>
+                    </body>
+                </html>
+            statusCode: "200"
+        type: mock
+  /pets:
+    get:
+      parameters:
+      - description: The type of pet to retrieve
+        in: query
+        name: type
+        schema:
+          type: string
+      - description: Page number of results to return.
+        in: query
+        name: page
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pets'
+          description: Successful operation
+          headers:
+            Access-Control-Allow-Origin:
+              description: URI that may access the resource
+              schema:
+                type: string
+              style: simple
+      summary: List all pets
+      tags:
+      - pets
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        passthroughBehavior: when_no_match
+        requestParameters:
+          integration.request.querystring.page: method.request.querystring.page
+          integration.request.querystring.type: method.request.querystring.type
+        responses:
+          default:
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            statusCode: "200"
+        type: http
+        uri: http://petstore.execute-api.us-east-1.amazonaws.com/petstore/pets
+    options:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+          description: Successful operation
+          headers:
+            Access-Control-Allow-Headers:
+              description: Used in response to a preflight request to indicate which
+                HTTP headers can be used when making the request.
+              schema:
+                type: string
+              style: simple
+            Access-Control-Allow-Methods:
+              description: Method or methods allowed when accessing the resource
+              schema:
+                type: string
+              style: simple
+            Access-Control-Allow-Origin:
+              description: URI that may access the resource
+              schema:
+                type: string
+              style: simple
+      x-amazon-apigateway-integration:
+        passthroughBehavior: when_no_match
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''POST,GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            statusCode: "200"
+        type: mock
+    post:
+      operationId: CreatePet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPet'
+        description: Pet object that needs to be added to the store
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewPetResponse'
+          description: Successful operation
+          headers:
+            Access-Control-Allow-Origin:
+              description: URI that may access the resource
+              schema:
+                type: string
+              style: simple
+      summary: Create a pet
+      tags:
+      - pets
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        passthroughBehavior: when_no_match
+        responses:
+          default:
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            statusCode: "200"
+        type: http
+        uri: http://petstore.execute-api.us-east-1.amazonaws.com/petstore/pets
+  /pets/{petId}:
+    get:
+      operationId: GetPet
+      parameters:
+      - description: The id of the pet to retrieve
+        in: path
+        name: petId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            examples:
+              br_company:
+                value: 'tax_id: 32.589.181/0001-20\r\nforce_creation: true\r\ncountry:
+                  BR\r\ntype: company\r\nuser_authorized: true'
+              br_person:
+                value: national_id:1XX.XXX.XXX-62\r\ndate_of_birth:1992-04-23\r\nforce_creation:true\r\ncountry:BR\r\ntype:person\r\nuser_authorized:true
+              br_vehicle:
+                value: 'national_id: 1XX.XXX.XXX-62\r\ndate_of_birth: 1992-04-23\r\nlicense_plate:
+                  GAT-1034\r\nforce_creation: true\r\ncountry: BR\r\ntype: vehicle\r\nuser_authorized:
+                  true'
+              co_company:
+                value: type:company\r\nforce_creation:false\r\ncountry:co\r\nuser_authorized:true\r\nnational_id:89XXXXXX51
+              co_person:
+                value: type:person\r\nforce_creation:true\r\ncountry:co\r\nuser_authorized:true\r\nnational_id:10XXXXXXX6
+              co_vehicle:
+                value: type:vehicle\r\nforce_creation:true\r\ncountry:co\r\nuser_authorized:true\r\nowner_document_id:19467998\r\nnational_id:1XXXXX8\r\nlicense_plate:BOV968
+              mx_company:
+                value: type:company\r\nforce_creation:true\r\ncountry:mx\r\nuser_authorized:true\r\ntax_id:PHI830429MG6
+              mx_person:
+                value: type:person\r\nforce_creation:true\r\ncountry:mx\r\nuser_authorized:true\r\nnational_id:MUTXXXXXXR04
+              mx_vehicle:
+                value: type:vehicle\r\nforce_creation:true\r\ncountry:mx\r\nuser_authorized:true\r\nlicense_plate:392NBF
+            schema:
+              $ref: '#/components/schemas/CreateCheckInput'
+        description: Hello
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: An example of a cat
+                  value:
+                    breed: Persian
+                    color: White
+                    gender: male
+                    name: Fluffy
+                    petType: Cat
+          description: Hello world
+      summary: Info for a specific pet
+      tags:
+      - pets
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        passthroughBehavior: when_no_match
+        requestParameters:
+          integration.request.path.petId: method.request.path.petId
+        responses:
+          default:
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            statusCode: "200"
+        type: http
+        uri: http://petstore.execute-api.us-east-1.amazonaws.com/petstore/pets/{petId}
+    options:
+      parameters:
+      - description: The id of the pet to retrieve
+        in: path
+        name: petId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+          description: Successful operation
+          headers:
+            Access-Control-Allow-Headers:
+              description: Used in response to a preflight request to indicate which
+                HTTP headers can be used when making the request.
+              schema:
+                type: string
+              style: simple
+            Access-Control-Allow-Methods:
+              description: Method or methods allowed when accessing the resource
+              schema:
+                type: string
+              style: simple
+            Access-Control-Allow-Origin:
+              description: URI that may access the resource
+              schema:
+                type: string
+              style: simple
+      x-amazon-apigateway-integration:
+        passthroughBehavior: when_no_match
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            statusCode: "200"
+        type: mock
+components:
+  schemas:
+    Empty:
+      type: object
+    NewPet:
+      properties:
+        price:
+          type: number
+        type:
+          $ref: '#/components/schemas/PetType'
+      type: object
+    NewPetResponse:
+      properties:
+        message:
+          type: string
+        pet:
+          $ref: '#/components/schemas/Pet'
+      type: object
+    Pet:
+      properties:
+        id:
+          type: integer
+        price:
+          type: number
+        type:
+          type: string
+      type: object
+    PetType:
+      enum:
+      - dog
+      - cat
+      - fish
+      - bird
+      - gecko
+      type: string
+    Pets:
+      items:
+        $ref: '#/components/schemas/Pet'
+      type: array
+x-amazon-apigateway-documentation:
+  createdDate: "2023-11-01T23:50:57Z"
+  documentationParts:
+  - location:
+      type: API
+    properties:
+      info:
+        description: Your first API with Amazon API Gateway. This is a sample API
+          that integrates via HTTP with our demo Pet Store endpoints
+  - location:
+      method: GET
+      type: METHOD
+    properties:
+      description: PetStore HTML web page containing API usage information
+      tags:
+      - pets
+  - location:
+      method: GET
+      path: /pets/{petId}
+      type: METHOD
+    properties:
+      summary: Info for a specific pet
+      tags:
+      - pets
+  - location:
+      method: GET
+      path: /pets
+      type: METHOD
+    properties:
+      summary: List all pets
+      tags:
+      - pets
+  - location:
+      method: POST
+      path: /pets
+      type: METHOD
+    properties:
+      summary: Create a pet
+      tags:
+      - pets
+  - location:
+      method: '*'
+      name: petId
+      path: /pets/{petId}
+      type: PATH_PARAMETER
+    properties:
+      description: The id of the pet to retrieve
+  - location:
+      method: GET
+      name: page
+      path: /pets
+      type: QUERY_PARAMETER
+    properties:
+      description: Page number of results to return.
+  - location:
+      method: GET
+      name: type
+      path: /pets
+      type: QUERY_PARAMETER
+    properties:
+      description: The type of pet to retrieve
+  - location:
+      method: GET
+      path: /pets/{petId}
+      type: REQUEST_BODY
+    properties:
+      content:
+        application/x-www-form-urlencoded:
+          examples:
+            br_company:
+              value: 'tax_id: 32.589.181/0001-20\r\nforce_creation: true\r\ncountry:
+                BR\r\ntype: company\r\nuser_authorized: true'
+            br_person:
+              value: national_id:1XX.XXX.XXX-62\r\ndate_of_birth:1992-04-23\r\nforce_creation:true\r\ncountry:BR\r\ntype:person\r\nuser_authorized:true
+            br_vehicle:
+              value: 'national_id: 1XX.XXX.XXX-62\r\ndate_of_birth: 1992-04-23\r\nlicense_plate:
+                GAT-1034\r\nforce_creation: true\r\ncountry: BR\r\ntype: vehicle\r\nuser_authorized:
+                true'
+            co_company:
+              value: type:company\r\nforce_creation:false\r\ncountry:co\r\nuser_authorized:true\r\nnational_id:89XXXXXX51
+            co_person:
+              value: type:person\r\nforce_creation:true\r\ncountry:co\r\nuser_authorized:true\r\nnational_id:10XXXXXXX6
+            co_vehicle:
+              value: type:vehicle\r\nforce_creation:true\r\ncountry:co\r\nuser_authorized:true\r\nowner_document_id:19467998\r\nnational_id:1XXXXX8\r\nlicense_plate:BOV968
+            mx_company:
+              value: type:company\r\nforce_creation:true\r\ncountry:mx\r\nuser_authorized:true\r\ntax_id:PHI830429MG6
+            mx_person:
+              value: type:person\r\nforce_creation:true\r\ncountry:mx\r\nuser_authorized:true\r\nnational_id:MUTXXXXXXR04
+            mx_vehicle:
+              value: type:vehicle\r\nforce_creation:true\r\ncountry:mx\r\nuser_authorized:true\r\nlicense_plate:392NBF
+          schema:
+            $ref: '#/components/schemas/CreateCheckInput'
+      description: Hello
+  - location:
+      type: RESOURCE
+    properties:
+      description: The PetStore root resource.
+  - location:
+      method: '*'
+      statusCode: "200"
+      type: RESPONSE
+    properties:
+      description: Successful operation
+  - location:
+      method: GET
+      path: /pets/{petId}
+      statusCode: "200"
+      type: RESPONSE
+    properties:
+      content:
+        application/json:
+          examples:
+            success:
+              summary: An example of a cat
+              value:
+                breed: Persian
+                color: White
+                gender: male
+                name: Fluffy
+                petType: Cat
+      description: Hello world
+  - location:
+      method: OPTIONS
+      name: Access-Control-Allow-Headers
+      statusCode: "200"
+      type: RESPONSE_HEADER
+    properties:
+      description: Used in response to a preflight request to indicate which HTTP
+        headers can be used when making the request.
+  - location:
+      method: OPTIONS
+      name: Access-Control-Allow-Methods
+      statusCode: "200"
+      type: RESPONSE_HEADER
+    properties:
+      description: Method or methods allowed when accessing the resource
+  - location:
+      method: '*'
+      name: Access-Control-Allow-Origin
+      statusCode: "200"
+      type: RESPONSE_HEADER
+    properties:
+      description: URI that may access the resource
+  - location:
+      method: GET
+      name: Content-Type
+      statusCode: "200"
+      type: RESPONSE_HEADER
+    properties:
+      description: Media type of request
+  version: "5"

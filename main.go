@@ -11,6 +11,8 @@ import (
 	"github.com/swaggest/openapi-go/openapi3"
 )
 
+var enableHack = false
+
 type SpecHandler struct {
 	specApigateway OpenapiGateway
 	spec           openapi3.Spec
@@ -38,21 +40,29 @@ func NewSpecHandler(path string) (SpecHandler, error) {
 	return handler, json.Unmarshal(b, &handler.specApigateway)
 }
 
-func execute(path string) error {
+func Execute(path string) ([]byte, error) {
 	h, err := NewSpecHandler(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, x := range h.specApigateway.AmazonApigatewayDocumentation.DocumentationParts {
+		if x.Location.Method == "*" {
+			continue
+		}
+
 		switch x.Location.Type {
 		case "API":
-			err = h.spec.Info.UnmarshalJSON(x.Properties)
+			// TODO: remove
+			err = h.processAPIPart(x)
 			if err != nil {
-				log.Println("Failed processing documentation part of type: API")
-				return err
+				return nil, err
 			}
 		case "METHOD":
+			if !enableHack {
+				continue
+			}
+
 			// TODO: Remove this logic, once aws_resource are migrated to the module
 			if strings.ToLower(x.Location.Method) != "options" {
 				continue
@@ -63,7 +73,7 @@ func execute(path string) error {
 
 				err := json.Unmarshal(x.Properties, &m)
 				if err != nil {
-					return err
+					return nil, err
 				}
 
 				h.spec.Paths.WithMapOfPathItemValuesItem(x.Location.Path, *path.WithSummary(m.Summary).WithDescription(m.Description))
@@ -73,7 +83,7 @@ func execute(path string) error {
 			err := schema.UnmarshalJSON(x.Properties)
 			if err != nil {
 				log.Println("Failed processing documentation part of type: MODEL for:", x.Location.Name, "with error:", err.Error())
-				return err
+				return nil, err
 			}
 
 			schemaOrRef := openapi3.SchemaOrRef{}
@@ -84,37 +94,16 @@ func execute(path string) error {
 		case "QUERY_PARAMETER":
 			// TODO
 		case "REQUEST_BODY":
-			requestBody := RequestBody{}
-
-			err := json.Unmarshal(x.Properties, &requestBody)
+			err := h.processRequestBodyPart(x)
 			if err != nil {
-				return err
+				return nil, err
 			}
-
-			if requestBody.Content == "" {
-				continue
-			}
-
-			operationKey := strings.ToLower(x.Location.Method)
-			path := h.spec.Paths.MapOfPathItemValues[x.Location.Path]
-			operation := path.MapOfOperationValues[operationKey]
-			requestBodyOrRef := operation.RequestBodyEns()
-
-			// TODO: fix this hack. It should be: requestBodyOrRef.UnmarshalJSON(x.Properties)
-			err = requestBodyOrRef.UnmarshalJSON([]byte(`{"content":` + requestBody.Content + `}`))
-			if err != nil {
-				return err
-			}
-
-			h.spec.Paths.WithMapOfPathItemValuesItem(
-				x.Location.Path,
-				*path.WithMapOfOperationValuesItem(operationKey, *operation.WithRequestBody(*requestBodyOrRef)))
 		case "RESOURCE":
 			m := Method{}
 
 			err := json.Unmarshal(x.Properties, &m)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			if path, ok := h.spec.Paths.MapOfPathItemValues[strings.ToLower(x.Location.Path)]; ok && path.Summary == nil && m.Summary != "" {
@@ -125,39 +114,14 @@ func execute(path string) error {
 				h.spec.Paths.WithMapOfPathItemValuesItem(strings.ToLower(x.Location.Path), *path.WithSummary(m.Description))
 			}
 		case "RESPONSE":
-			var response Response
-			if err := json.Unmarshal([]byte(x.Properties), &response); err != nil {
-				return err
-			}
-
-			operationKey := strings.ToLower(x.Location.Method)
-			path := h.spec.Paths.MapOfPathItemValues[x.Location.Path]
-			operation := path.MapOfOperationValues[operationKey]
-			responses := operation.Responses
-			responseOrRef := openapi3.ResponseOrRef{}
-
-			err := responseOrRef.UnmarshalJSON(response.getBytes())
+			err := h.processResponsePart(x)
 			if err != nil {
-				return err
+				return nil, err
 			}
-
-			h.spec.Paths.WithMapOfPathItemValuesItem(
-				x.Location.Path,
-				*path.WithMapOfOperationValuesItem(operationKey, *operation.WithResponses(
-					*responses.WithMapOfResponseOrRefValuesItem(
-						x.Location.StatusCode,
-						responseOrRef,
-					),
-				)))
 		}
 	}
 
-	b, err := h.spec.MarshalYAML()
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile("out.yaml", b, 0600)
+	return h.spec.MarshalYAML()
 }
 
 func main() {
@@ -166,10 +130,15 @@ func main() {
 		return
 	}
 
-	err := execute(os.Args[1])
+	b, err := Execute(os.Args[1])
 	if err != nil {
 		log.Println("Found error trying to read file:", err.Error())
 		return
 	}
 
+	err = os.WriteFile("out.yaml", b, 0600)
+	if err != nil {
+		log.Println("Found error writing to file:", err.Error())
+		return
+	}
 }

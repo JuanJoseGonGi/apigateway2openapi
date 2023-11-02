@@ -1,0 +1,592 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "PetStore",
+    "description" : "Your first API with Amazon API Gateway. This is a sample API that integrates via HTTP with our demo Pet Store endpoints",
+    "version" : "2023-11-01T19:44:06Z"
+  },
+  "servers" : [ {
+    "url" : "https://eq3vgsjkve.execute-api.us-east-1.amazonaws.com/{basePath}",
+    "variables" : {
+      "basePath" : {
+        "default" : "staging"
+      }
+    }
+  } ],
+  "paths" : {
+    "/pets" : {
+      "get" : {
+        "tags" : [ "pets" ],
+        "summary" : "List all pets",
+        "parameters" : [ {
+          "name" : "type",
+          "in" : "query",
+          "description" : "The type of pet to retrieve",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Page number of results to return.",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "description" : "URI that may access the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Pets"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "GET",
+          "uri" : "http://petstore.execute-api.us-east-1.amazonaws.com/petstore/pets",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestParameters" : {
+            "integration.request.querystring.page" : "method.request.querystring.page",
+            "integration.request.querystring.type" : "method.request.querystring.type"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "http"
+        }
+      },
+      "post" : {
+        "tags" : [ "pets" ],
+        "summary" : "Create a pet",
+        "operationId" : "CreatePet",
+        "requestBody" : {
+          "description" : "Pet object that needs to be added to the store",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NewPet"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "description" : "URI that may access the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NewPetResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "POST",
+          "uri" : "http://petstore.execute-api.us-east-1.amazonaws.com/petstore/pets",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "http"
+        }
+      },
+      "options" : {
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "description" : "URI that may access the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "description" : "Method or methods allowed when accessing the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "description" : "Used in response to a preflight request to indicate which HTTP headers can be used when making the request.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'POST,GET,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/pets/{petId}" : {
+      "get" : {
+        "tags" : [ "pets" ],
+        "summary" : "Info for a specific pet",
+        "operationId" : "GetPet",
+        "parameters" : [ {
+          "name" : "petId",
+          "in" : "path",
+          "description" : "The id of the pet to retrieve",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Hello world",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "description" : "URI that may access the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Pet"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "httpMethod" : "GET",
+          "uri" : "http://petstore.execute-api.us-east-1.amazonaws.com/petstore/pets/{petId}",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestParameters" : {
+            "integration.request.path.petId" : "method.request.path.petId"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "http"
+        }
+      },
+      "options" : {
+        "parameters" : [ {
+          "name" : "petId",
+          "in" : "path",
+          "description" : "The id of the pet to retrieve",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "description" : "URI that may access the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "description" : "Method or methods allowed when accessing the resource",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "description" : "Used in response to a preflight request to indicate which HTTP headers can be used when making the request.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    },
+    "/" : {
+      "get" : {
+        "tags" : [ "pets" ],
+        "description" : "PetStore HTML web page containing API usage information",
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "headers" : {
+              "Content-Type" : {
+                "description" : "Media type of request",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : { }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Content-Type" : "'text/html'"
+              },
+              "responseTemplates" : {
+                "text/html" : "<html>\n    <head>\n        <style>\n        body {\n            color: #333;\n            font-family: Sans-serif;\n            max-width: 800px;\n            margin: auto;\n        }\n        </style>\n    </head>\n    <body>\n        <h1>Welcome to your Pet Store API</h1>\n        <p>\n            You have successfully deployed your first API. You are seeing this HTML page because the <code>GET</code> method to the root resource of your API returns this content as a Mock integration.\n        </p>\n        <p>\n            The Pet Store API contains the <code>/pets</code> and <code>/pets/{petId}</code> resources. By making a <a href=\"/$context.stage/pets/\" target=\"_blank\"><code>GET</code> request</a> to <code>/pets</code> you can retrieve a list of Pets in your API. If you are looking for a specific pet, for example the pet with ID 1, you can make a <a href=\"/$context.stage/pets/1\" target=\"_blank\"><code>GET</code> request</a> to <code>/pets/1</code>.\n        </p>\n        <p>\n            You can use a REST client such as <a href=\"https://www.getpostman.com/\" target=\"_blank\">Postman</a> to test the <code>POST</code> methods in your API to create a new pet. Use the sample body below to send the <code>POST</code> request:\n        </p>\n        <pre>\n{\n    \"type\" : \"cat\",\n    \"price\" : 123.11\n}\n        </pre>\n    </body>\n</html>"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Pets" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/Pet"
+        }
+      },
+      "Empty" : {
+        "type" : "object"
+      },
+      "NewPetResponse" : {
+        "type" : "object",
+        "properties" : {
+          "pet" : {
+            "$ref" : "#/components/schemas/Pet"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Pet" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "price" : {
+            "type" : "number"
+          }
+        }
+      },
+      "NewPet" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/components/schemas/PetType"
+          },
+          "price" : {
+            "type" : "number"
+          }
+        }
+      },
+      "PetType" : {
+        "type" : "string",
+        "enum" : [ "dog", "cat", "fish", "bird", "gecko" ]
+      }
+    }
+  },
+  "x-amazon-apigateway-documentation" : {
+    "version" : "5",
+    "createdDate" : "2023-11-01T23:50:57Z",
+    "documentationParts" : [ {
+      "location" : {
+        "type" : "API"
+      },
+      "properties" : {
+        "info" : {
+          "description" : "Your first API with Amazon API Gateway. This is a sample API that integrates via HTTP with our demo Pet Store endpoints"
+        }
+      }
+    }, {
+      "location" : {
+        "type" : "METHOD",
+        "method" : "GET"
+      },
+      "properties" : {
+        "tags" : [ "pets" ],
+        "description" : "PetStore HTML web page containing API usage information"
+      }
+    }, {
+      "location" : {
+        "type" : "METHOD",
+        "path" : "/pets/{petId}",
+        "method" : "GET"
+      },
+      "properties" : {
+        "tags" : [ "pets" ],
+        "summary" : "Info for a specific pet"
+      }
+    }, {
+      "location" : {
+        "type" : "METHOD",
+        "path" : "/pets",
+        "method" : "GET"
+      },
+      "properties" : {
+        "tags" : [ "pets" ],
+        "summary" : "List all pets"
+      }
+    }, {
+      "location" : {
+        "type" : "METHOD",
+        "path" : "/pets",
+        "method" : "POST"
+      },
+      "properties" : {
+        "tags" : [ "pets" ],
+        "summary" : "Create a pet"
+      }
+    }, {
+      "location" : {
+        "type" : "PATH_PARAMETER",
+        "path" : "/pets/{petId}",
+        "method" : "*",
+        "name" : "petId"
+      },
+      "properties" : {
+        "description" : "The id of the pet to retrieve"
+      }
+    }, {
+      "location" : {
+        "type" : "QUERY_PARAMETER",
+        "path" : "/pets",
+        "method" : "GET",
+        "name" : "page"
+      },
+      "properties" : {
+        "description" : "Page number of results to return."
+      }
+    }, {
+      "location" : {
+        "type" : "QUERY_PARAMETER",
+        "path" : "/pets",
+        "method" : "GET",
+        "name" : "type"
+      },
+      "properties" : {
+        "description" : "The type of pet to retrieve"
+      }
+    }, {
+      "location" : {
+        "type" : "REQUEST_BODY",
+        "path" : "/pets/{petId}",
+        "method" : "GET"
+      },
+      "properties" : {
+        "description" : "Hello",
+        "content" : {
+          "application/x-www-form-urlencoded" : {
+            "examples" : {
+              "br_company" : {
+                "value" : "tax_id: 32.589.181/0001-20\\r\\nforce_creation: true\\r\\ncountry: BR\\r\\ntype: company\\r\\nuser_authorized: true"
+              },
+              "br_person" : {
+                "value" : "national_id:1XX.XXX.XXX-62\\r\\ndate_of_birth:1992-04-23\\r\\nforce_creation:true\\r\\ncountry:BR\\r\\ntype:person\\r\\nuser_authorized:true"
+              },
+              "br_vehicle" : {
+                "value" : "national_id: 1XX.XXX.XXX-62\\r\\ndate_of_birth: 1992-04-23\\r\\nlicense_plate: GAT-1034\\r\\nforce_creation: true\\r\\ncountry: BR\\r\\ntype: vehicle\\r\\nuser_authorized: true"
+              },
+              "co_company" : {
+                "value" : "type:company\\r\\nforce_creation:false\\r\\ncountry:co\\r\\nuser_authorized:true\\r\\nnational_id:89XXXXXX51"
+              },
+              "co_person" : {
+                "value" : "type:person\\r\\nforce_creation:true\\r\\ncountry:co\\r\\nuser_authorized:true\\r\\nnational_id:10XXXXXXX6"
+              },
+              "co_vehicle" : {
+                "value" : "type:vehicle\\r\\nforce_creation:true\\r\\ncountry:co\\r\\nuser_authorized:true\\r\\nowner_document_id:19467998\\r\\nnational_id:1XXXXX8\\r\\nlicense_plate:BOV968"
+              },
+              "mx_company" : {
+                "value" : "type:company\\r\\nforce_creation:true\\r\\ncountry:mx\\r\\nuser_authorized:true\\r\\ntax_id:PHI830429MG6"
+              },
+              "mx_person" : {
+                "value" : "type:person\\r\\nforce_creation:true\\r\\ncountry:mx\\r\\nuser_authorized:true\\r\\nnational_id:MUTXXXXXXR04"
+              },
+              "mx_vehicle" : {
+                "value" : "type:vehicle\\r\\nforce_creation:true\\r\\ncountry:mx\\r\\nuser_authorized:true\\r\\nlicense_plate:392NBF"
+              }
+            },
+            "schema" : {
+              "$ref" : "#/components/schemas/CreateCheckInput"
+            }
+          }
+        }
+      }
+    },{
+      "location" : {
+        "type" : "RESOURCE"
+      },
+      "properties" : {
+        "description" : "The PetStore root resource."
+      }
+    }, {
+      "location" : {
+        "type" : "RESPONSE",
+        "method" : "*",
+        "statusCode" : "200"
+      },
+      "properties" : {
+        "description" : "Successful operation"
+      }
+    }, {
+      "location" : {
+        "type" : "RESPONSE",
+        "path" : "/pets/{petId}",
+        "method" : "GET",
+        "statusCode" : "200"
+      },
+      "properties" : {
+        "description" : "Hello world",
+        "content" : {
+          "application/json" : {
+            "examples" : {
+              "success" : {
+                "summary" : "An example of a cat",
+                "value" : {
+                  "name" : "Fluffy",
+                  "petType" : "Cat",
+                  "color" : "White",
+                  "gender" : "male",
+                  "breed" : "Persian"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, {
+      "location" : {
+        "type" : "RESPONSE_HEADER",
+        "method" : "OPTIONS",
+        "statusCode" : "200",
+        "name" : "Access-Control-Allow-Headers"
+      },
+      "properties" : {
+        "description" : "Used in response to a preflight request to indicate which HTTP headers can be used when making the request."
+      }
+    }, {
+      "location" : {
+        "type" : "RESPONSE_HEADER",
+        "method" : "OPTIONS",
+        "statusCode" : "200",
+        "name" : "Access-Control-Allow-Methods"
+      },
+      "properties" : {
+        "description" : "Method or methods allowed when accessing the resource"
+      }
+    }, {
+      "location" : {
+        "type" : "RESPONSE_HEADER",
+        "method" : "*",
+        "statusCode" : "200",
+        "name" : "Access-Control-Allow-Origin"
+      },
+      "properties" : {
+        "description" : "URI that may access the resource"
+      }
+    }, {
+      "location" : {
+        "type" : "RESPONSE_HEADER",
+        "method" : "GET",
+        "statusCode" : "200",
+        "name" : "Content-Type"
+      },
+      "properties" : {
+        "description" : "Media type of request"
+      }
+    } ]
+  }
+}
