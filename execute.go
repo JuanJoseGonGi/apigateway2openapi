@@ -96,14 +96,14 @@ func Execute(path string) ([]byte, error) {
 		case "QUERY_PARAMETER":
 			// TODO
 		case "REQUEST_BODY":
-			if enableHack == "yes" {
-				continue
-			}
+			// if enableHack == "yes" {
+			// 	continue
+			// }
 
 			err := h.processRequestBodyPart(x)
 			if err != nil {
-				log.Println("Found error processing documentation part: REQUEST_BODY")
-				return nil, err
+				log.Println("Found error processing documentation part: REQUEST_BODY", err.Error())
+				// return nil, err
 			}
 		case "RESOURCE":
 			m := Method{}
@@ -124,7 +124,7 @@ func Execute(path string) ([]byte, error) {
 		case "RESPONSE":
 			err := h.processResponsePart(x)
 			if err != nil {
-				log.Println("Found error processing documentation part: RESPONSE")
+				log.Println("Found error processing documentation part: RESPONSE", err.Error())
 				return nil, err
 			}
 		}
