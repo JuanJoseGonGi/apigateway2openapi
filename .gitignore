@@ -1,0 +1,23 @@
+# Build artifacts
+apigateway2openapi
+out.yaml
+test-output.yaml
+
+# Development tools
+.serena/
+
+# Go build cache
+.gocache/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+coverage.out
