@@ -11,8 +11,6 @@ import (
 	"github.com/swaggest/openapi-go/openapi3"
 )
 
-var enableHack = os.Getenv("HACK")
-
 type SpecHandler struct {
 	specApigateway OpenapiGateway
 	spec           *openapi3.Spec
@@ -42,6 +40,15 @@ func Execute(path string) ([]byte, error) {
 		return nil, err
 	}
 
+	// Validate input structure
+	if h.specApigateway.AmazonApigatewayDocumentation.DocumentationParts == nil {
+		return nil, fmt.Errorf("invalid API Gateway export: no documentation parts found")
+	}
+
+	if len(h.specApigateway.AmazonApigatewayDocumentation.DocumentationParts) == 0 {
+		log.Println("Warning: API Gateway export contains no documentation parts")
+	}
+
 	for _, x := range h.specApigateway.AmazonApigatewayDocumentation.DocumentationParts {
 		if x.Location.Method == "*" {
 			continue
@@ -60,25 +67,10 @@ func Execute(path string) ([]byte, error) {
 				return nil, err
 			}
 		case "METHOD":
-			if enableHack != "yes" {
-				continue
-			}
-
-			// TODO: Remove this logic, once aws_resource are migrated to the module
-			if strings.ToLower(x.Location.Method) != "options" {
-				continue
-			}
-
-			if path, ok := h.spec.Paths.MapOfPathItemValues[x.Location.Path]; ok && path.Summary == nil {
-				m := Method{}
-
-				err := json.Unmarshal(x.Properties, &m)
-				if err != nil {
-					log.Println("Found error processing documentation part: METHOD")
-					return nil, err
-				}
-
-				h.spec.Paths.WithMapOfPathItemValuesItem(x.Location.Path, *path.WithSummary(m.Summary).WithDescription(m.Description))
+			err := h.processMethodPart(x)
+			if err != nil {
+				log.Println("Found error processing documentation part: METHOD", err.Error())
+				return nil, err
 			}
 		case "MODEL":
 			schema := jsonschema.SchemaOrBool{}
@@ -92,9 +84,17 @@ func Execute(path string) ([]byte, error) {
 			schemaOrRef.FromJSONSchema(schema)
 			h.spec.ComponentsEns().SchemasEns().WithMapOfSchemaOrRefValuesItem(x.Location.Name, schemaOrRef)
 		case "PATH_PARAMETER":
-			// TODO
+			err := h.processPathParameterPart(x)
+			if err != nil {
+				log.Println("Found error processing documentation part: PATH_PARAMETER", err.Error())
+				return nil, err
+			}
 		case "QUERY_PARAMETER":
-			// TODO
+			err := h.processQueryParameterPart(x)
+			if err != nil {
+				log.Println("Found error processing documentation part: QUERY_PARAMETER", err.Error())
+				return nil, err
+			}
 		case "REQUEST_BODY":
 			// if enableHack == "yes" {
 			// 	continue
