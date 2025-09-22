@@ -27,8 +27,9 @@ type OpenapiGateway struct {
 }
 
 type Method struct {
-	Description string `json:"description"`
-	Summary     string `json:"summary"`
+	Description string   `json:"description"`
+	Summary     string   `json:"summary"`
+	Tags        []string `json:"tags"`
 }
 
 type RequestBody struct {
@@ -46,42 +47,3 @@ type Response struct {
 	ResponseModels   map[string]string             `json:"responseModels"`
 }
 
-// TODO: Delete this method when responses are set correctly in documentation part
-func (r *Response) getBytes() []byte {
-	out := make(map[string]any)
-	respExamples := make(map[string]map[string]any)
-
-	for contentType, examples := range r.ResponseExamples {
-		cc := make(map[string]map[string]any)
-		for key, example := range examples {
-			var obj any
-
-			obj = example.Value
-			if contentType == "application/json" {
-				if err := json.Unmarshal([]byte(example.Value), &obj); err != nil {
-					panic(err)
-				}
-			}
-
-			if cc[key] == nil {
-				cc[key] = make(map[string]any)
-			}
-
-			cc[key]["value"] = obj
-			if respExamples[contentType] == nil {
-				respExamples[contentType] = make(map[string]any)
-			}
-			respExamples[contentType]["examples"] = cc
-		}
-	}
-
-	out["description"] = r.Description
-	out["content"] = respExamples
-
-	b, err := json.Marshal(out)
-	if err != nil {
-		panic(err)
-	}
-
-	return b
-}
