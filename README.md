@@ -3,15 +3,23 @@
 ![Code lines](https://sloc.xyz/github/mauriciocm9/apigateway2openapi/?category=code)
 ![Comments](https://sloc.xyz/github/mauriciocm9/apigateway2openapi/?category=comments)
 
-A comprehensive Go tool that converts AWS API Gateway documentation parts to valid OpenAPI 3.0 specifications with **100% coverage** of all AWS documentation part types.
+A comprehensive Go tool that converts AWS API Gateway documentation parts to valid OpenAPI 3.0 specifications with **complete coverage** of all AWS documentation part types.
+
+## 🎯 Why Use This Tool
+
+Transform your AWS API Gateway exports into industry-standard OpenAPI specifications for:
+- **API Documentation**: Generate comprehensive API documentation for development teams
+- **Code Generation**: Use with OpenAPI generators to create client SDKs and server stubs
+- **API Testing**: Integrate with testing frameworks that support OpenAPI specifications
+- **DevOps Integration**: Automate API documentation as part of your CI/CD pipeline
 
 ## ✨ Features
 
-- **Complete AWS API Gateway Support**: All 8 documentation part types supported
-- **Professional CLI**: Built with Cobra framework for excellent user experience
-- **Configurable Output**: Custom output filenames and verbose logging
-- **Production Ready**: No hacks, proper error handling, input validation
-- **Comprehensive Testing**: Full test suite with unit and integration tests
+- **Complete AWS API Gateway Support**: Supports all AWS documentation part types for comprehensive API documentation
+- **Professional CLI**: Intuitive command-line interface with configurable options and detailed help
+- **Flexible Output**: Custom output filenames, verbose logging, and configurable processing options
+- **Production Ready**: Enterprise-grade reliability with robust error handling and input validation
+- **Well Tested**: Comprehensive test suite ensuring consistent and accurate conversions
 
 ## 📋 Supported Documentation Parts
 
@@ -125,20 +133,17 @@ go test -v
 go build -o apigateway2openapi cmd/apigateway2openapi/main.go
 ```
 
-## 🎯 Recent Improvements
+## 🎯 Key Features
 
-### ✅ Completed (v2.0)
-- **Complete AWS Coverage**: Added PATH_PARAMETER and QUERY_PARAMETER support
-- **Professional CLI**: Cobra framework with configurable output and verbose mode
-- **Code Quality**: Removed all hacks, global variables, and panic() calls
-- **Testing**: Comprehensive test suite for all functionality
-- **Documentation**: Enhanced README and architecture documentation
+### Production Ready
+- **Enterprise Grade**: Robust error handling and input validation
+- **Performance Optimized**: Efficient processing of large API Gateway exports
+- **Reliable**: Comprehensive test suite ensuring consistent output quality
 
-### 🔧 Technical Debt Eliminated
-- ❌ Removed `getBytes()` hack method
-- ❌ Removed `enableHack` global variable
-- ❌ Eliminated all `panic()` calls
-- ❌ Removed hardcoded output filename
+### Developer Experience
+- **Modern CLI**: Intuitive command-line interface with helpful flags and options
+- **Flexible Output**: Configurable output files and detailed logging options
+- **Easy Integration**: Simple to incorporate into CI/CD pipelines and automation workflows
 
 ## 📄 License
 
