@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/mauriciocm9/apigateway2openapi"
+	"github.com/JuanJoseGonGi/apigateway2openapi"
 	"github.com/spf13/cobra"
 )
 

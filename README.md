@@ -115,7 +115,6 @@ go test -v -cover
 ├── execute.go                 # Main conversion engine with input validation
 ├── documentation_part.go      # Type-specific processors for all documentation parts
 ├── *_test.go                 # Comprehensive test suite
-└── CLAUDE.md                 # Detailed architecture documentation
 ```
 
 ### Build and Test
